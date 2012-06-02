@@ -2,10 +2,11 @@
 class BubbleChart
   constructor: (data) ->
     @data = data
-    @width = 940
+    @width = 950
     @height = 600
+    @current_display = "all"
 
-    @tooltip = CustomTooltip("gates_tooltip", 240)
+    @tooltip = CustomTooltip("bubble_tooltip", 240)
 
     # locations the nodes will move towards
     # depending on which view is currently being
@@ -65,7 +66,7 @@ class BubbleChart
   # create svg at #vis and then 
   # create circle representation for each node
   create_vis: () =>
-    @vis = d3.select("#vis").append("svg")
+    @vis = d3.select("#chart-canvas").append("svg")
       .attr("width", @width)
       .attr("height", @height)
       .attr("id", "svg_vis")
@@ -134,9 +135,29 @@ class BubbleChart
       d.x = d.x + (@center.x - d.x) * (@damper + 0.02) * alpha
       d.y = d.y + (@center.y - d.y) * (@damper + 0.02) * alpha
 
+  set_display: (display_id) =>
+    @current_display = display_id
+    if @current_display == "all"
+      this.display_group_all()
+    else if @current_display == "dc_vs_nation"
+      this.display_dc_vs_nation()
+    else if @current_display == "rent_vs_remaining"
+      this.display_rent_vs_remaining()
+    else if @current_display == "state"
+      this.display_by_state()
+    else
+      console.log("warning cannot display by #{display_id}")
+      this.display_group_all()
+
+  display_by_state: () =>
+    console.log('state')
+
+  display_rent_vs_remaining: () =>
+    console.log('r_vs_r')
+
   # sets the display of bubbles to be separated
   # into each year. Does this by calling move_towards_year
-  display_by_year: () =>
+  display_dc_vs_nation: () =>
     @force.gravity(@layout_gravity)
       .charge(this.charge)
       .friction(0.9)
@@ -187,9 +208,13 @@ class BubbleChart
 
 root = exports ? this
 
+cleanNum = (num) ->
+  num.replace(/[\",\$]/,"")
+
 cleanData = (raw) ->
   raw.forEach (d) ->
-    d.size = parseInt(d.size.replace(/[\\\\",]/,""))
+    d.size = parseInt(cleanNum(d.lease_rsf))
+    d.rent_per_sf = parseFloat(cleanNum(d.rent_prsf))
   raw
 
 $ ->
@@ -199,15 +224,30 @@ $ ->
     data = cleanData(csv)
     chart = new BubbleChart csv
     chart.start()
-    root.display_all()
-  root.display_all = () =>
-    chart.display_group_all()
-  root.display_year = () =>
-    chart.display_by_year()
-  root.toggle_view = (view_type) =>
-    if view_type == 'year'
-      root.display_year()
-    else
-      root.display_all()
+    chart.set_display('all')
 
-  d3.csv "data/sizes.csv", render_vis
+
+  toggle_overlay = (selected_tab) =>
+    overlays =
+      all: {name:"#chart-all-overlay",height:550}
+      dc_vs_nation: {name:"#chart-dc-vs-nation-overlay",height:550}
+      rent_vs_remaining: {name:"#chart-rent-vs-remaining-overlay",height:550}
+      state: {name:"#chart-state-overlay",height:550}
+
+    d3.values(overlays).forEach (overlay) ->
+      $(overlay.name).hide()
+
+    currentOverlay = overlays[selected_tab]
+    if !currentOverlay
+      console.log("warning: #{selected_tab} overlay not found")
+      currentOverlay = overlays["all"]
+    currentOverlayDiv = $(currentOverlay.name)
+    currentOverlayDiv.delay(300).fadeIn(500)
+    $("#chart-frame").css({'height':currentOverlay.height})
+
+
+  root.toggle_view = (view_type) =>
+    toggle_overlay(view_type)
+    chart.set_display(view_type)
+
+  d3.csv "data/short.csv", render_vis

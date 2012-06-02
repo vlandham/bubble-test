@@ -23,25 +23,56 @@
 </head>
 
 <body>
-
   <div id="container" class="container">
-    <header>
-    <h1>Test of 82,000 Bubbles</h1>
-    </header>
-    <div id="main" role="main">
-      <!-- <div id="view_selection" class="btn-group"> -->
-      <!--   <a href="#" id="all" class="btn active">All Grants</a> -->
-      <!--   <a href="#" id="year" class="btn">Grants By Year</a> -->
-      <!-- </div> -->
-      <div id="vis"></div>
+    <h2 id="chart-main-title">GSA's Leased Inventory</h2>
+    <h3 id="chart-main-subtitle">An analysis of leases 50,000 RSF and larger</h3>
+    <div id="chart-frame">
+    <div id="chart-main">
+      <div id="chart-nav" class="btn-group">
+        <a href="#" id="all" class="btn active">Inventory</a>
+        <a href="#" id="dc_vs_nation" class="btn">DC Metro vs The Nation</a>
+        <a href="#" id="rent_vs_remaining" class="btn">Rent vs Remaining Term</a>
+        <a href="#" id="state" class="btn">State by State</a>
+      </div>
+      <div id="chart-overlays">
+        <div class="chart-overlay" id="chart-all-overlay" style="display:block;">
+          <div class="chart-annotation chart-all-overlay-annotation" >
+            <h5>All Placeholder</h5>
+            <p>This is a placeholder</p>
+          </div>
+          <div class="chart-key">
+            <p>Chart Key</p>
+          </div>
+        </div>
+        <div class="chart-overlay" id="chart-dc-vs-nation-overlay">
+          <div class="chart-annotation chart-dc-overlay-annotation" >
+            <h5>Washington, DC Metro Region</h5>
+            <p>This is a placeholder</p>
+          </div>
+          <div class="chart-annotation chart-nation-overlay-annotation" >
+            <h5>The Rest of the Nation</h5>
+            <p>This is a placeholder</p>
+          </div>
+        </div>
+        <div class="chart-overlay" id="chart-rent-vs-remaining-overlay">
+          <div class="chart-annotation chart-rent-overlay-annotation" >
+            <h5>Rent vs Remaining Placeholder</h5>
+            <p>This is a placeholder</p>
+          </div>
+        </div>
+        <div class="chart-overlay" id="chart-state-overlay">
+        </div>
+      </div>
+      <div id="chart-canvas"></div>
     </div>
-    <footer>
-    </footer>
-  </div> <!--! end of #container -->
+    <div id="chart-footer">
+    </div>
+  </div>
+</div> <!--! end of #container -->
 
 
-  <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script> -->
-  <script>window.jQuery || document.write('<script src="js/libs/jquery-1.6.2.min.js"><\/script>')</script>
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script> -->
+<script>window.jQuery || document.write('<script src="js/libs/jquery-1.6.2.min.js"><\/script>')</script>
 
   <script defer src="js/plugins.js"></script>
   <script defer src="js/script.js"></script>
@@ -55,30 +86,30 @@
   <script type="text/javascript">
     $(document).ready(function() {
         $(document).ready(function() {
-          $('#view_selection a').click(function() {
+          $('#chart-nav a').click(function() {
             var view_type = $(this).attr('id');
-            $('#view_selection a').removeClass('active');
+            $('#chart-nav a').removeClass('active');
             $(this).toggleClass('active');
             toggle_view(view_type);
             return false;
+            });
           });
         });
-    });
-  </script>
+</script>
 
 
-  <script>
-    window._gaq = [['_setAccount','UA-17355070-1'],['_trackPageview'],['_trackPageLoadTime']];
-    Modernizr.load({
-      load: ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js'
-    });
-  </script>
+<script>
+  window._gaq = [['_setAccount','UA-17355070-1'],['_trackPageview'],['_trackPageLoadTime']];
+  Modernizr.load({
+    load: ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js'
+  });
+</script>
 
 
-  <!--[if lt IE 7 ]>
-    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
-    <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
-  <![endif]-->
-  
+<!--[if lt IE 7 ]>
+<script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+<script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
+<![endif]-->
+
 </body>
 </html>

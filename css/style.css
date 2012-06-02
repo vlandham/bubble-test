@@ -2,19 +2,111 @@ a, a:visited, a:active {
   color: #444;
 }
 
-#vis {
-  width: 940px;
-  height: 600px;
-  clear: both;
-  margin-bottom: 10px;
+#chart-frame {
+  width: 970px;
+  height: 550px;
 }
 
-footer {
+#chart-main {
+  position: relative;
+  width:100%;
+  height:100%;
+}
+
+
+#chart-footer {
   text-align: center;
 }
 
-#view_selection {
+#chart-nav {
   margin-top: 10px;
+  padding: 15px 0 0;
+  margin: 0 10px;
+  z-index: 100;
+  position: absolute;
+  width: 950px;
+}
+
+#chart-overlays {
+  position: absolute;
+  z-index: 40;
+}
+
+.chart-overlay {
+  position: absolute;
+  display: none;
+}
+
+.chart-overlay p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45em;
+}
+
+.chart-key {
+  position: absolute;
+  top: 210px;
+  left: 10px;
+  width: 200px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.chart-all-overlay-annotation {
+  position: absolute;
+  width: 275px;
+  top: 100px;
+  left:10px;
+}
+
+.chart-annotation h5 {
+  font-size: 16px;
+  line-height: 16px;
+  margin-bottom: 7px;
+}
+
+.chart-annotation p {
+  font-size: 13px;
+}
+
+.chart-dc-overlay-annotation {
+  position: absolute;
+  left: 30px;
+  top: 120px;
+  width: 140px;
+}
+
+.chart-dc-overlay-annotation {
+  position: absolute;
+  left: 30px;
+  top: 120px;
+  width: 140px;
+}
+
+.chart-nation-overlay-annotation {
+  position: absolute;
+  left: 800px;
+  top: 120px;
+  width: 130px;
+}
+
+.chart-rent-overlay-annotation {
+  top: 80px;
+  left: 10px;
+  width: 500px;
+  position: absolute;
+}
+
+#chart-canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  margin-bottom: 10px;
+  overflow:hidden;
+  top:0;
+  left:0;
 }
 
 .years {
