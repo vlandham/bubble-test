@@ -41,7 +41,14 @@
             <p>This is a placeholder</p>
           </div>
           <div class="chart-key">
-            <p>Chart Key</p>
+            <p>Circles are sized according to lease rentable square feet.</p>
+            <div id="chart-key-size">
+              <svg id="chart-key-svg"></svg>
+            </div>
+            <p>Color shows amount</p>
+            <div id="chart-key-color">
+              <svg id="chart-key-color-svg"></svg>
+            </div>
           </div>
         </div>
         <div class="chart-overlay" id="chart-dc-vs-nation-overlay">
@@ -66,6 +73,7 @@
       <div id="chart-canvas"></div>
     </div>
     <div id="chart-footer">
+      <p>Chart shows only active leases that are at least 50,000 rentable square feet.  Awarded leases that have not yet commenced are not included.  Rent figures are the actual rent paid by GSA.  Rent is typically portrayed as full service but in some cases the GSA may directly pay some portion of expenses, usually a relatively small component.  Charts are based upon March 2012 lease inventory data provided by GSA.</p>
     </div>
   </div>
 </div> <!--! end of #container -->

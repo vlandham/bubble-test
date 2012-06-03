@@ -4,7 +4,7 @@ a, a:visited, a:active {
 
 #chart-frame {
   width: 970px;
-  height: 550px;
+  height: 700px;
 }
 
 #chart-main {
@@ -16,6 +16,7 @@ a, a:visited, a:active {
 
 #chart-footer {
   text-align: center;
+  padding-bottom: 10px;
 }
 
 #chart-nav {
@@ -51,6 +52,41 @@ a, a:visited, a:active {
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+.chart-key p {
+  margin-bottom: 8px;
+}
+
+#chart-key-size {
+  position: relative;
+  height: 110px;
+  width: 200px;
+}
+
+.chart-key-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+#chart-key-color {
+  position: relative;
+  height: 110px;
+  width: 200px;
+}
+
+.chart-key-color-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.chart-key-circle {
+  stroke-width: 1;
+  stroke: #999;
+  stroke-dasharray: 2 2;
+  fill: none;
 }
 
 .chart-all-overlay-annotation {
@@ -105,13 +141,8 @@ a, a:visited, a:active {
   z-index: 10;
   margin-bottom: 10px;
   overflow:hidden;
-  top:0;
+  top:20px;
   left:0;
-}
-
-.years {
-  font-size: 21px;
-  fill: #aaa;
 }
 
 .tooltip {
@@ -138,5 +169,34 @@ a, a:visited, a:active {
 
 .tooltip .name {
   font-weight:bold;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+}
+
+.axis line {
+  stroke: #ddd;
+  fill: none;
+}
+
+.axis path {
+  fill: none;
+  stroke: #ddd;
+}
+
+.x.axis line {
+}
+
+.x.axis .minor {
+  stroke-opacity: .5;
+}
+
+.x.axis path {
+  /* display: none; */
+}
+
+.y.axis line, .y.axis path {
+  stroke: #ddd;
 }
 

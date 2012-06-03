@@ -3,7 +3,11 @@ class BubbleChart
   constructor: (data) ->
     @data = data
     @width = 950
-    @height = 600
+    @height = 700
+    @pb = 30
+    @pt = 120
+    @pl = 80
+    @pr = 10
     @current_display = "all"
 
     @tooltip = CustomTooltip("bubble_tooltip", 240)
@@ -12,11 +16,10 @@ class BubbleChart
     # depending on which view is currently being
     # used
     @center = {x: @width / 2, y: @height / 2}
-    @year_centers = {
-      "2008": {x: @width / 3, y: @height / 2},
-      "2009": {x: @width / 2, y: @height / 2},
-      "2010": {x: 2 * @width / 3, y: @height / 2}
-    }
+    @location_centers = [
+      {x: @width / 3, y: @height / 2},
+      {x: 2 * @width / 3, y: @height / 2}
+    ]
 
     # used when setting up force and
     # moving around nodes
@@ -31,15 +34,61 @@ class BubbleChart
 
     # nice looking colors - no reason to buck the trend
     @fill_color = d3.scale.ordinal()
-      .domain(["low", "medium", "high"])
-      .range(["#d84b2a", "#beccae", "#7aa25c"])
+      .domain([1,2,3,4,5])
+      .range(["#D7191C", "#FDAE61", "#FFFFBF", "#ABD9E9", "#2C7BB6"])
 
     # use the max total_amount in the data as the max in the scale's domain
     max_amount = d3.max(@data, (d) -> parseInt(d.size))
-    @radius_scale = d3.scale.pow().exponent(0.5).domain([0, max_amount]).range([2, 23])
+    @radius_scale = d3.scale.pow().exponent(0.5).domain([0, max_amount]).range([1, 40])
+
+    category_extent = d3.extent(@data, (d) -> d.category_value)
+    @category_scale = d3.scale.quantize().domain(category_extent).range([1,2,3,4,5])
+
+    remaining_lease_extent = d3.extent(@data, (d) -> d.remaining_term_years)
+    @lease_scale = d3.scale.linear().domain([0,20]).range([0, (@width - (@pl + @pr))])
+    @x_axis = d3.svg.axis().scale(@lease_scale).tickSubdivide(1).tickSize(5,0).orient("bottom")
+
+    total_rent_extent = d3.extent(@data, (d) -> d.total_rent)
+    @total_rent_scale = d3.scale.linear().domain(total_rent_extent).range([0, @height - (@pt + @pb)].reverse())
+    @y_axis = d3.svg.axis().scale(@total_rent_scale).ticks(5).orient("left").tickSize(-@width,0)
     
     this.create_nodes()
+    this.add_key()
     this.create_vis()
+
+  add_key: () =>
+    key = d3.select("#chart-key-svg")
+
+    key.append("circle")
+      .attr("r", @radius_scale(1000000))
+      .attr("class", "chart-key-circle")
+      .attr('cx', 30)
+      .attr('cy', 30)
+
+    key.append("circle")
+      .attr("r", @radius_scale(100000))
+      .attr("class", "chart-key-circle")
+      .attr('cx', 30)
+      .attr('cy', 42)
+
+    key.append("circle")
+      .attr("r", @radius_scale(10000))
+      .attr("class", "chart-key-circle")
+      .attr('cx', 30)
+      .attr('cy', 44)
+
+    that = this
+    color_key = d3.select("#chart-key-color-svg")
+    rect_width = 30
+    rect_height = 10
+    console.log(@category_scale.domain())
+    color_key.selectAll("rect").data(@category_scale.range())
+      .enter().append("rect")
+        .attr("x", (d,i) -> (i) * rect_width)
+        .attr("width", rect_width)
+        .attr("height", rect_height)
+        .attr("fill", (d) -> that.fill_color(d))
+
 
   # create node objects from original data
   # that will serve as the data behind each
@@ -50,8 +99,12 @@ class BubbleChart
       node = {
         id: i
         radius: @radius_scale(d.size)
+        category: @category_scale(d.category_value)
+        location: if (d.state_category == "District of Columbia") then 0 else 1
         value: d.size
-        name: d.grant_title
+        state: d.state
+        remaining_term_years: d.remaining_term_years
+        total_rent: d.total_rent
         org: d.organization
         group: d.group
         year: d.start_year
@@ -82,10 +135,11 @@ class BubbleChart
     # see transition below
     @circles.enter().append("circle")
       .attr("r", 0)
-      .attr("fill", (d) => @fill_color(d.group))
+      .attr("fill", (d) => @fill_color(d.category))
       .attr("stroke-width", 2)
-      .attr("stroke", (d) => d3.rgb(@fill_color(d.group)).darker())
+      .attr("stroke", (d) => d3.rgb(@fill_color(d.category)).darker())
       .attr("id", (d) -> "bubble_#{d.id}")
+      .attr("class", "chart-bubble")
       .on("mouseover", (d,i) -> that.show_details(d,i,this))
       .on("mouseout", (d,i) -> that.hide_details(d,i,this))
 
@@ -114,27 +168,6 @@ class BubbleChart
       .nodes(@nodes)
       .size([@width, @height])
 
-  # Sets up force layout to display
-  # all nodes in one circle.
-  display_group_all: () =>
-    @force.gravity(@layout_gravity)
-      .charge(this.charge)
-      .friction(0.9)
-      .on "tick", (e) =>
-        @circles.each(this.move_towards_center(e.alpha))
-          .attr("cx", (d) -> d.x)
-          .attr("cy", (d) -> d.y)
-    @force.start()
-
-    this.hide_years()
-
-  # Moves all circles towards the @center
-  # of the visualization
-  move_towards_center: (alpha) =>
-    (d) =>
-      d.x = d.x + (@center.x - d.x) * (@damper + 0.02) * alpha
-      d.y = d.y + (@center.y - d.y) * (@damper + 0.02) * alpha
-
   set_display: (display_id) =>
     @current_display = display_id
     if @current_display == "all"
@@ -149,11 +182,49 @@ class BubbleChart
       console.log("warning cannot display by #{display_id}")
       this.display_group_all()
 
-  display_by_state: () =>
-    console.log('state')
+  # Sets up force layout to display
+  # all nodes in one circle.
+  display_group_all: () =>
+    @force.gravity(@layout_gravity)
+      .charge(this.charge)
+      .friction(0.9)
+      .on "tick", (e) =>
+        @circles.each(this.move_towards_center(e.alpha))
+          .attr("cx", (d) -> d.x)
+          .attr("cy", (d) -> d.y)
+    @force.start()
+
+    this.hide_scales()
+
+  # Moves all circles towards the @center
+  # of the visualization
+  move_towards_center: (alpha) =>
+    (d) =>
+      d.x = d.x + (@center.x - d.x) * (@damper + 0.02) * alpha
+      d.y = d.y + (@center.y - d.y) * (@damper + 0.02) * alpha
 
   display_rent_vs_remaining: () =>
-    console.log('r_vs_r')
+    @force.gravity(0)
+      .charge(0)
+      .friction(0.2)
+      .on "tick", (e) =>
+        @circles.each(this.move_torwards_scale(e.alpha))
+          .attr("cx", (d) -> d.x)
+          .attr("cy", (d) -> d.y)
+    @force.start()
+    # @force.stop()
+    this.display_scales()
+
+  display_by_state: () =>
+    @force.gravity(@layout_gravity)
+      .charge(this.charge)
+      .friction(0.9)
+      .on "tick", (e) =>
+        @circles.each(this.move_torwards_location_center(e.alpha))
+          .attr("cx", (d) -> d.x)
+          .attr("cy", (d) -> d.y)
+    @force.start()
+    this.hide_scales()
 
   # sets the display of bubbles to be separated
   # into each year. Does this by calling move_towards_year
@@ -162,59 +233,77 @@ class BubbleChart
       .charge(this.charge)
       .friction(0.9)
       .on "tick", (e) =>
-        @circles.each(this.move_towards_year(e.alpha))
+        @circles.each(this.move_torwards_location_center(e.alpha))
           .attr("cx", (d) -> d.x)
           .attr("cy", (d) -> d.y)
     @force.start()
+    this.hide_scales()
 
-    this.display_years()
-
-  # move all circles to their associated @year_centers 
-  move_towards_year: (alpha) =>
+  move_torwards_scale: (alpha) =>
     (d) =>
-      target = @year_centers[d.year]
+      target = {}
+      target.x = @lease_scale(d.remaining_term_years) + @pl
+      target.y = @total_rent_scale(d.total_rent) + @pt
+      # console.log(target)
+      # d.x = d.x + (target.x - d.x) * (@damper + 0.02) * alpha * 1.1
+      # d.y = d.y + (target.y - d.y) * (@damper + 0.02) * alpha * 1.1
+      # TODO: ??? force does some weird projection?
+      d.y = d.y + (target.y - d.y) * Math.sin(Math.PI * (1 - alpha*10)) * 0.2
+      d.x = d.x + (target.x - d.x) * Math.sin(Math.PI * (1 - alpha*10)) * 0.1
+
+  # move all circles to their associated @location_centers 
+  move_torwards_location_center: (alpha) =>
+    (d) =>
+      target = @location_centers[d.location]
       d.x = d.x + (target.x - d.x) * (@damper + 0.02) * alpha * 1.1
       d.y = d.y + (target.y - d.y) * (@damper + 0.02) * alpha * 1.1
 
   # Method to display year titles
-  display_years: () =>
-    years_x = {"2008": 160, "2009": @width / 2, "2010": @width - 160}
-    years_data = d3.keys(years_x)
-    years = @vis.selectAll(".years")
-      .data(years_data)
+  display_scales: () =>
+    @vis.insert("g", ".chart-bubble")
+      .attr("id", "chart-x-axis")
+      .attr("class", "x axis")
+      .attr("transform", "translate(#{@pl},#{(@height - @pb)})")
+      .call(@x_axis)
 
-    years.enter().append("text")
-      .attr("class", "years")
-      .attr("x", (d) => years_x[d] )
-      .attr("y", 40)
-      .attr("text-anchor", "middle")
-      .text((d) -> d)
+    @vis.insert("g", ".chart-bubble")
+      .attr("id", "chart-y-axis")
+      .attr("class", "y axis")
+      .attr("transform", "translate(#{@pl},#{@pt})")
+      .call(@y_axis)
 
-  # Method to hide year titiles
-  hide_years: () =>
-    years = @vis.selectAll(".years").remove()
+  # Method to hide scales
+  hide_scales: () =>
+    @vis.select("#chart-x-axis").remove()
+    @vis.select("#chart-y-axis").remove()
 
   show_details: (data, i, element) =>
     d3.select(element).attr("stroke", "black")
     content = "<span class=\"name\">Title:</span><span class=\"value\"> #{data.name}</span><br/>"
     content +="<span class=\"name\">Size:</span><span class=\"value\"> #{addCommas(data.value)}</span><br/>"
+    content +="<span class=\"name\">Term Years (x):</span><span class=\"value\"> #{data.remaining_term_years}</span><br/>"
+    content +="<span class=\"name\">Total Rent (y):</span><span class=\"value\"> $#{addCommas(data.total_rent)}</span><br/>"
     @tooltip.showTooltip(content,d3.event)
 
 
   hide_details: (data, i, element) =>
-    d3.select(element).attr("stroke", (d) => d3.rgb(@fill_color(d.group)).darker())
+    d3.select(element).attr("stroke", (d) => d3.rgb(@fill_color(d.category)).darker())
     @tooltip.hideTooltip()
 
 
 root = exports ? this
 
 cleanNum = (num) ->
-  num.replace(/[\",\$]/,"")
+  num.replace(/[\"\,\$]/g,"")
 
 cleanData = (raw) ->
   raw.forEach (d) ->
     d.size = parseInt(cleanNum(d.lease_rsf))
-    d.rent_per_sf = parseFloat(cleanNum(d.rent_prsf))
+    d.lease_rsf_value = parseInt(cleanNum(d.lease_rsf))
+    d.category_value = parseFloat(cleanNum(d.rent_prsf))
+    d.rent_prsf_value = parseFloat(cleanNum(d.rent_prsf))
+    d.remaining_term_years = parseFloat(d.remaining_term_years)
+    d.total_rent = parseFloat(cleanNum(d.annual_rent))
   raw
 
 $ ->
@@ -228,11 +317,12 @@ $ ->
 
 
   toggle_overlay = (selected_tab) =>
+    h = 700
     overlays =
-      all: {name:"#chart-all-overlay",height:550}
-      dc_vs_nation: {name:"#chart-dc-vs-nation-overlay",height:550}
-      rent_vs_remaining: {name:"#chart-rent-vs-remaining-overlay",height:550}
-      state: {name:"#chart-state-overlay",height:550}
+      all: {name:"#chart-all-overlay",height:h}
+      dc_vs_nation: {name:"#chart-dc-vs-nation-overlay",height:h}
+      rent_vs_remaining: {name:"#chart-rent-vs-remaining-overlay",height:h+30}
+      state: {name:"#chart-state-overlay",height:h}
 
     d3.values(overlays).forEach (overlay) ->
       $(overlay.name).hide()
@@ -251,3 +341,4 @@ $ ->
     chart.set_display(view_type)
 
   d3.csv "data/short.csv", render_vis
+  # d3.csv "data/inventory_abridged.csv", render_vis
