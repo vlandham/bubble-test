@@ -32,20 +32,35 @@
         <a href="#" id="all" class="btn active">Inventory</a>
         <a href="#" id="dc_vs_nation" class="btn">DC Metro vs The Nation</a>
         <a href="#" id="rent_vs_remaining" class="btn">Rent vs Remaining Term</a>
-        <a href="#" id="state" class="btn">State by State</a>
+        <!-- <a href="#" id="state" class="btn">State by State</a> -->
       </div>
       <div id="chart-overlays">
         <div class="chart-overlay" id="chart-all-overlay" style="display:block;">
           <div class="chart-annotation chart-all-overlay-annotation" >
-            <h5>All Placeholder</h5>
+            <h5>Inventory Placeholder</h5>
             <p>This is a placeholder</p>
           </div>
+          <div id="chart-high-label">
+            <span>highest rent PRSF</span>
+          </div>
+          <div id="chart-low-label">
+            <span>lowest rent PRSF</span>
+          </div>
           <div class="chart-key">
-            <p>Circles are sized according to lease rentable square feet.</p>
+            <p>Circles are sized according to lease rentable square feet (RSF).</p>
             <div id="chart-key-size">
+              <div class="circle-label" id="circle-label-one">
+                <span style="left:25px">2 million</span>
+              </div>
+              <div class="circle-label" id="circle-label-two">
+                <span style="left:29px">1 million</span>
+              </div>
+              <div class="circle-label" id="circle-label-three">
+                <span style="left:20px">50 thousand</span>
+              </div>
               <svg id="chart-key-svg"></svg>
             </div>
-            <p>Color shows amount</p>
+            <p>Color shows Rent PRSF range.</p>
             <div id="chart-key-color">
               <svg id="chart-key-color-svg"></svg>
             </div>
@@ -65,6 +80,12 @@
           <div class="chart-annotation chart-rent-overlay-annotation" >
             <h5>Rent vs Remaining Placeholder</h5>
             <p>This is a placeholder</p>
+          </div>
+          <div class="chart-annotation chart-rent-x-overlay-annotation" >
+            <p>Most investors seek 10+ years of remaining lease term.</p>
+          </div>
+          <div class="chart-annotation chart-rent-y-overlay-annotation" >
+            <p>Something about $15 million</p>
           </div>
         </div>
         <div class="chart-overlay" id="chart-state-overlay">
