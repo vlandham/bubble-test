@@ -211,14 +211,14 @@ a, a:visited, a:active {
 }
 
 .chart-rent-x-overlay-annotation {
-  top: 200px;
+  top: 210px;
   left: 530px;
   width: 200px;
   position: absolute;
 }
 
 .chart-rent-y-overlay-annotation {
-  top: 503px;
+  top: 543px;
   left: 830px;
   width: 200px;
   position: absolute;
