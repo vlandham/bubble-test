@@ -17,8 +17,9 @@ a, a:visited, a:active {
 
 
 #chart-footer {
-  text-align: center;
+  text-align: left;
   padding-bottom: 10px;
+  font-style: italic;
 }
 
 #chart-nav {
@@ -48,7 +49,7 @@ a, a:visited, a:active {
 
 #chart-high-label {
   position: absolute;
-  top: 80px;
+  top: 100px;
   left: 700px;
   width: 60px;
   border-top: dashed 1px rgba(0, 0, 0, 0.2);
@@ -56,15 +57,15 @@ a, a:visited, a:active {
 
 #chart-high-label span {
   position: absolute;
-  right: -105px;
+  right: -115px;
   top: -10px;
-  width: 100px;
+  width: 110px;
 }  
 
 
 #chart-low-label {
   position: absolute;
-  top: 670px;
+  top: 650px;
   left: 720px;
   width: 60px;
   border-top: dashed 1px rgba(0, 0, 0, 0.2);
@@ -168,7 +169,7 @@ a, a:visited, a:active {
 .chart-all-overlay-annotation {
   position: absolute;
   width: 275px;
-  top: 100px;
+  top: 80px;
   left:10px;
 }
 
@@ -204,9 +205,9 @@ a, a:visited, a:active {
 }
 
 .chart-rent-overlay-annotation {
-  top: 80px;
+  top: 60px;
   left: 10px;
-  width: 500px;
+  width: 450px;
   position: absolute;
 }
 
@@ -304,5 +305,15 @@ line.axis-line {
   stroke: #999;
   stroke-dasharray: 2 3;
   fill:none;
+}
+
+.state-label-sub {
+  fill: #999;
+}
+
+.state-label-main {
+  fill: #000;
+  font-size: 16px;
+  font-weight: bold;
 }
 

@@ -25,20 +25,19 @@
 <body>
   <div id="container" class="container">
     <h2 id="chart-main-title">GSA's Leased Inventory</h2>
-    <h3 id="chart-main-subtitle">An analysis of leases 50,000 RSF and larger</h3>
+    <h3 id="chart-main-subtitle">An analysis of leases 75,000 RSF and larger</h3>
     <div id="chart-frame">
     <div id="chart-main">
       <div id="chart-nav" class="btn-group">
         <a href="#" id="all" class="btn active">Inventory</a>
         <a href="#" id="dc_vs_nation" class="btn">DC Metro vs The Nation</a>
         <a href="#" id="rent_vs_remaining" class="btn">Rent vs Remaining Term</a>
-        <!-- <a href="#" id="state" class="btn">State by State</a> -->
       </div>
       <div id="chart-overlays">
         <div class="chart-overlay" id="chart-all-overlay" style="display:block;">
           <div class="chart-annotation chart-all-overlay-annotation" >
-            <h5>Inventory Placeholder</h5>
-            <p>This is a placeholder</p>
+            <h5>Inventory</h5>
+            <p id="inventory-annotation-text"></p>
           </div>
           <div id="chart-high-label">
             <span>highest rent PRSF</span>
@@ -56,7 +55,7 @@
                 <span style="left:29px">1 million</span>
               </div>
               <div class="circle-label" id="circle-label-three">
-                <span style="left:20px">50 thousand</span>
+                <span style="left:20px">500 thousand</span>
               </div>
               <svg id="chart-key-svg"></svg>
             </div>
@@ -69,23 +68,17 @@
         <div class="chart-overlay" id="chart-dc-vs-nation-overlay">
           <div class="chart-annotation chart-dc-overlay-annotation" >
             <h5>Washington, DC Metro Region</h5>
-            <p>This is a placeholder</p>
+            <p id="dc-annotation-text"></p>
           </div>
           <div class="chart-annotation chart-nation-overlay-annotation" >
             <h5>The Rest of the Nation</h5>
-            <p>This is a placeholder</p>
+            <p id="nation-annotation-text"></p>
           </div>
         </div>
         <div class="chart-overlay" id="chart-rent-vs-remaining-overlay">
           <div class="chart-annotation chart-rent-overlay-annotation" >
-            <h5>Rent vs Remaining Placeholder</h5>
-            <p>This is a placeholder</p>
-          </div>
-          <div class="chart-annotation chart-rent-x-overlay-annotation" >
-            <p>Most investors seek 10+ years of remaining lease term.</p>
-          </div>
-          <div class="chart-annotation chart-rent-y-overlay-annotation" >
-            <p>Something about $15 million</p>
+            <h5>Rent vs Remaining Term</h5>
+            <p id="rent-annotation-text"></p>
           </div>
         </div>
         <div class="chart-overlay" id="chart-state-overlay">
@@ -94,7 +87,7 @@
       <div id="chart-canvas"></div>
     </div>
     <div id="chart-footer">
-      <p>Chart shows only active leases that are at least 50,000 rentable square feet.  Awarded leases that have not yet commenced are not included.  Rent figures are the actual rent paid by GSA.  Rent is typically portrayed as full service but in some cases the GSA may directly pay some portion of expenses, usually a relatively small component.  Charts are based upon March 2012 lease inventory data provided by GSA.</p>
+      <p>Chart shows only active leases that are at least 75,000 rentable square feet.  Awarded leases that have not yet commenced are not included.  Rent figures are the actual rent paid by GSA.  Rent is typically portrayed as full service but in some cases the GSA may directly pay some portion of expenses, usually a relatively small component.  Charts are based upon March 2012 lease inventory data provided by GSA.</p>
     </div>
   </div>
 </div> <!--! end of #container -->

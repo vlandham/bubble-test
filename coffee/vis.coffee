@@ -10,6 +10,7 @@ class BubbleChart
     @pr = 10
     @tick_inc = 0
     @current_display = "all"
+    @states_centers = {}
 
     @tooltip = CustomTooltip("bubble_tooltip", 240)
 
@@ -36,7 +37,7 @@ class BubbleChart
     # nice looking colors - no reason to buck the trend
     @fill_color = d3.scale.ordinal()
       .domain([1,2,3,4,5])
-      .range(["#D7191C", "#FDAE61", "#FFFFBF", "#ABD9E9", "#2C7BB6"])
+      .range(["#D7191C", "#FDAE61", "#FFFFBF", "#ABD9E9", "#2C7BB6"].reverse())
 
     # use the max total_amount in the data as the max in the scale's domain
     # max_amount = d3.max(@data, (d) -> parseInt(d.size))
@@ -47,7 +48,6 @@ class BubbleChart
 
     category_extent = d3.extent(@data, (d) -> d.category_value)
     category_extent = [3.33, 68.75]
-    console.log(category_extent)
     @category_scale = d3.scale.quantize().domain(category_extent).range([1,2,3,4,5])
     @category_scale = (v) ->
       if v < 15
@@ -58,11 +58,11 @@ class BubbleChart
         3
       else if v < 60
         4
-      else if v < 75
+      else
         5
 
-    [Math.round(category_extent[0])..category_extent[1]].forEach (i) =>
-      console.log(i + "- " + @category_scale(i))
+    # [Math.round(category_extent[0])..category_extent[1]].forEach (i) =>
+    #   console.log(i + "- " + @category_scale(i))
 
     remaining_lease_extent = d3.extent(@data, (d) -> d.remaining_term_years)
     @lease_scale = d3.scale.linear().domain([0,20]).range([0, (@width - (@pl + @pr))])
@@ -72,20 +72,85 @@ class BubbleChart
     @total_rent_scale = d3.scale.linear().domain(total_rent_extent).range([0, @height - (@pt + @pb)].reverse())
     @y_axis = d3.svg.axis().scale(@total_rent_scale).ticks(5).orient("left").tickSize(-@width,0).tickFormat( (d) -> "$#{d/1000000} million")
 
-    states_nest = d3.nest()
-      .key((d) -> d.state_category)
-      .sortKeys(d3.descending)
-      .rollup (d) ->
-        lease_rsf_sum: d3.sum(d, (g) -> g.lease_rsf_value)
-        count: d.length
-        name: d[0].state_category
-      .entries(@data)
+    # states_nest = d3.nest()
+    #   .key((d) -> d.state_category)
+    #   .sortKeys(d3.descending)
+    #   .rollup (d) ->
+    #     lease_rsf_sum: d3.sum(d, (g) -> g.lease_rsf_value)
+    #     lease_rsf_sum_mil: Math.round(d3.sum(d, (g) -> g.lease_rsf_value)/100000)/10
+    #     count: d.length
+    #     name: d[0].state_category
+    #   .entries(@data)
 
-    @states_data = states_nest.map((d) -> d.values).sort( (a,b) -> b.lease_rsf_sum - a.lease_rsf_sum)
+    # @states_data = states_nest.map((d) -> d.values).sort( (a,b) -> b.lease_rsf_sum - a.lease_rsf_sum)
 
     this.create_nodes()
+    this.set_annotations()
     this.add_key()
+    # this.setup_states()
     this.create_vis()
+
+  # setup_states: () =>
+  #   x_inc = @width / 4
+  #   cur_x = x_inc / 2
+  #   cur_y = @pt + 100
+
+  #   @states_data.forEach (s) =>
+  #     if cur_x > @width
+  #       cur_x = x_inc / 2
+  #       cur_y += 120
+  #     @states_centers[s.name] = {x:cur_x, y:cur_y}
+  #     cur_x += x_inc
+
+  # display_state_labels: () =>
+  #   that = this
+  #   labelG = @vis.append("g").attr("id", "state-labels")
+  #   labels = labelG.selectAll(".state-label").data(@states_data)
+  #     .enter().append("g")
+  #       .attr("class", "state-label")
+  #       .attr("transform", (d) -> "translate(#{that.states_centers[d.name].x},#{that.states_centers[d.name].y - 100})")
+
+  #   labels.append("text")
+  #     .attr("class", "state-label-main")
+  #     .attr("text-anchor", "middle")
+  #     .attr("dy", "-8px")
+  #     .text((d) -> "#{d.lease_rsf_sum_mil} MSF (#{d.count} leases)")
+
+  #   labels.append("text")
+  #     .attr("class","state-label-sub")
+  #     .attr("text-anchor", "middle")
+  #     .attr("dy", "8px")
+  #     .text((d) -> d.name)
+
+
+  # hide_state_labels: () =>
+  #   @vis.select("#state-labels").remove()
+
+  set_annotations: () =>
+    total_rsf = d3.sum(@data, (d) -> d.lease_rsf_value)
+    total_annual_rent = d3.sum(@data, (d) -> d.annual_rent_value)
+    total_rent_billion = Math.round(total_annual_rent / 10000000)/100
+    inventory_text = "There are #{@data.length} leases in the United States that are larger than 75,000 RSF.  Together, these total #{addCommas(total_rsf)} RSF and $#{addCommas(total_rent_billion)} billion in annual rent."
+    $("#inventory-annotation-text").html(inventory_text)
+
+    dc_rentals = @data.filter((d) -> parseInt(d.region) == 11)
+    nation_rentals = @data.filter((d) -> parseInt(d.region) != 11)
+    dc_total_rsf = d3.sum(dc_rentals, (d) -> d.lease_rsf_value)
+    nation_total_rsf = d3.sum(nation_rentals, (d) -> d.lease_rsf_value)
+
+    dc_text = "#{dc_rentals.length} leases totaling #{addCommas(dc_total_rsf)} RSF"
+    nation_text = "#{nation_rentals.length} leases totaling #{addCommas(nation_total_rsf)} RSF"
+
+    $("#dc-annotation-text").html(dc_text)
+    $("#nation-annotation-text").html(nation_text)
+
+    long_lease_rentals = @data.filter((d) -> (parseInt(d.remaining_term_years) > 10))
+    long_lease_rsf = d3.sum(long_lease_rentals, (d) -> d.lease_rsf_value)
+    long_lease_percent = Math.round(long_lease_rentals.length / @data.length * 1000)/10
+
+    rent_text = "#{long_lease_rentals.length} leases (#{addCommas(long_lease_rsf)} RSF) have remaining lease terms longer than 10 years.  This is #{long_lease_percent}% of the number of leases in the analysis size range."
+
+    $("#rent-annotation-text").html(rent_text)
 
   add_key: () =>
     key = d3.select("#chart-key-svg")
@@ -137,7 +202,7 @@ class BubbleChart
         id: i
         radius: @radius_scale(d.size)
         category: @category_scale(d.category_value)
-        location_index: if (d.state_category == "District of Columbia") then 0 else 1
+        location_index: if (parseInt(d.region) == 11) then 0 else 1
         value: d.size
         city: d.city
         state: d.state
@@ -178,7 +243,7 @@ class BubbleChart
     @circles.enter().append("circle")
       .attr("r", 0)
       .attr("fill", (d) => @fill_color(d.category))
-      .attr("stroke-width", 2)
+      .attr("stroke-width", 0.7)
       .attr("stroke", (d) => d3.rgb(@fill_color(d.category)).darker())
       .attr("id", (d) -> "bubble_#{d.id}")
       .attr("class", "chart-bubble")
@@ -218,8 +283,8 @@ class BubbleChart
       this.display_dc_vs_nation()
     else if @current_display == "rent_vs_remaining"
       this.display_rent_vs_remaining()
-    else if @current_display == "state"
-      this.display_by_state()
+    # else if @current_display == "state"
+    #   this.display_by_state()
     else
       console.log("warning cannot display by #{display_id}")
       this.display_group_all()
@@ -241,11 +306,12 @@ class BubbleChart
     @force.start()
 
     this.hide_scales()
+    # this.hide_state_labels()
 
 
   buoyancy: (alpha) =>
     (d) =>
-      targetY = @center.y - (d.category ) * 100
+      targetY = @center.y - (d.category ) * 130
       d.y = d.y + (targetY - d.y) * (0.07) * alpha * alpha * alpha * 100
 
 
@@ -268,18 +334,21 @@ class BubbleChart
           .attr("cy", (d) -> d.y)
     @force.start()
     # @force.stop()
+    # this.hide_state_labels()
     this.display_scales()
 
-  display_by_state: () =>
-    @force.gravity(@layout_gravity)
-      .charge(this.charge)
-      .friction(0.9)
-      .on "tick", (e) =>
-        @circles.each(this.move_torwards_location_center(e.alpha))
-          .attr("cx", (d) -> d.x)
-          .attr("cy", (d) -> d.y)
-    @force.start()
-    this.hide_scales()
+  # display_by_state: () =>
+  #   @force.gravity(@layout_gravity)
+  #     .charge(this.charge)
+  #     .friction(0.9)
+  #     .on "tick", (e) =>
+  #       @circles.each(this.move_torwards_states(e.alpha))
+  #         .attr("cx", (d) -> d.x)
+  #         .attr("cy", (d) -> d.y)
+  #   @force.start()
+  #   this.display_state_labels()
+  #   this.hide_scales()
+
 
   # sets the display of bubbles to be separated
   # into each year. Does this by calling move_towards_year
@@ -293,6 +362,20 @@ class BubbleChart
           .attr("cy", (d) -> d.y)
     @force.start()
     this.hide_scales()
+    # this.hide_state_labels()
+
+  # move_torwards_states: (alpha) =>
+  #   (d) =>
+  #     target = @states_centers[d.state_category]
+  #     r =  Math.max(5, d.radius)
+  #     d.x = d.x + (target.x - d.x) * (0.05) * alpha * 0.5 * r
+  #     d.y = d.y + (target.y - d.y) * (0.05) * alpha * 0.5 * r
+  #     # d.y += (target.y - d.y) * Math.sin(Math.PI * (1 - alpha*10)) * 0.6
+  #     # d.x += (target.x - d.x) * Math.sin(Math.PI * (1 - alpha*10)) * 0.4
+  #     
+  #     # d.x = d.x + (target.x - d.x) * (@damper + 0.02) * alpha * 1.1
+  #     # d.y = d.y + (target.y - d.y) * (@damper + 0.02) * alpha * 1.1
+
 
   move_torwards_scale: (alpha) =>
     (d) =>
@@ -345,13 +428,27 @@ class BubbleChart
       .attr("y1", 0)
       .attr("x2", @lease_scale(10))
       .attr("y2", @height - (@pb + @pt))
+
+    yax.append("line")
+      .attr("class", "axis-line")
+      .attr("x1", @lease_scale(5))
+      .attr("y1", 0)
+      .attr("x2", @lease_scale(5))
+      .attr("y2", @height - (@pb + @pt))
       
     yax.append("line")
       .attr("class", "axis-line")
-      .attr("x1", -5)
-      .attr("y1", @total_rent_scale(15000000))
-      .attr("x2", @width)
-      .attr("y2", @total_rent_scale(15000000))
+      .attr("x1", @lease_scale(15))
+      .attr("y1", 0)
+      .attr("x2", @lease_scale(15))
+      .attr("y2", @height - (@pb + @pt))
+
+    # yax.append("line")
+    #   .attr("class", "axis-line")
+    #   .attr("x1", -5)
+    #   .attr("y1", @total_rent_scale(15000000))
+    #   .attr("x2", @width)
+    #   .attr("y2", @total_rent_scale(15000000))
 
   # Method to hide scales
   hide_scales: () =>
@@ -362,7 +459,7 @@ class BubbleChart
     d3.select(element).attr("stroke", "black")
     content = "<p class=\"main\">#{data.address}<br/>#{data.city}, #{data.state}</p><hr class=\"tooltip-hr\">"
     content +="<span class=\"name\">RSF:</span><span class=\"value\"> #{addCommas(data.lease_rsf_value)}</span><br/>"
-    content +="<span class=\"name\">Rent:</span><span class=\"value\"> #{data.rent_prsf}</span><br/>"
+    content +="<span class=\"name\">Rent:</span><span class=\"value\"> #{data.rent_prsf}/RSF</span><br/>"
     @tooltip.showTooltip(content,d3.event)
 
   hide_details: (data, i, element) =>
@@ -382,15 +479,22 @@ cleanData = (raw) ->
     d.category_value = parseFloat(cleanNum(d.rent_prsf))
     d.rent_prsf_value = parseFloat(cleanNum(d.rent_prsf))
     d.remaining_term_years = parseFloat(d.remaining_term_years)
+    d.annual_rent_value = parseFloat(cleanNum(d.annual_rent))
     d.total_rent = parseFloat(cleanNum(d.annual_rent))
   raw
+
+filterData = (data) ->
+  filter = data.filter (d) ->
+    d.lease_rsf_value > 75000
+  filter
+
 
 $ ->
   chart = null
 
   render_vis = (csv) ->
-    data = cleanData(csv)
-    chart = new BubbleChart csv
+    data = filterData(cleanData(csv))
+    chart = new BubbleChart data
     chart.start()
     chart.set_display('all')
 
