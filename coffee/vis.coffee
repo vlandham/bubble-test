@@ -20,7 +20,7 @@ class BubbleChart
     @center = {x: @width / 2 + 70, y: @height / 2 + 20}
     @location_centers = [
       {x: @width / 3, y: @height / 2},
-      {x: 2 * @width / 3, y: @height / 2}
+      {x: (2 * @width / 3) - 30, y: @height / 2}
     ]
 
     # used when setting up force and
@@ -144,7 +144,7 @@ class BubbleChart
     $("#dc-annotation-text").html(dc_text)
     $("#nation-annotation-text").html(nation_text)
 
-    long_lease_rentals = @data.filter((d) -> (parseInt(d.remaining_term_years) > 10))
+    long_lease_rentals = @data.filter((d) -> (parseFloat(d.remaining_term_years) >= 10.0))
     long_lease_rsf = d3.sum(long_lease_rentals, (d) -> d.lease_rsf_value)
     long_lease_percent = Math.round(long_lease_rentals.length / @data.length * 1000)/10
 
@@ -204,10 +204,10 @@ class BubbleChart
         category: @category_scale(d.category_value)
         location_index: if (parseInt(d.region) == 11) then 0 else 1
         value: d.size
-        city: d.city
-        state: d.state
+        city: d.city.toUpperCase()
+        state: d.state.toUpperCase()
         state_category: d.state_category
-        address: d.address
+        address: d.address.toUpperCase()
         remaining_term_years: d.remaining_term_years
         total_rent: d.total_rent
         rent_prsf: d.rent_prsf
