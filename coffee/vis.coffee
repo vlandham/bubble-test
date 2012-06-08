@@ -190,7 +190,7 @@ class BubbleChart
       .attr("x", (d,i) -> (i * rect_width) + rect_width)
       .attr("y", (d,i) -> rect_height + 12)
       .attr("text-anchor", "end")
-      .text((d) -> d)
+      .text((d) -> "$#{d}")
 
   # create node objects from original data
   # that will serve as the data behind each
@@ -286,7 +286,7 @@ class BubbleChart
     # else if @current_display == "state"
     #   this.display_by_state()
     else
-      console.log("warning cannot display by #{display_id}")
+      # console.log("warning cannot display by #{display_id}")
       this.display_group_all()
 
   # Sets up force layout to display
@@ -414,7 +414,7 @@ class BubbleChart
       .attr("class", "axis-text")
       .attr("transform", "translate(#{@width/2 - 40},#{30})")
       .attr("text-anchor", "middle")
-      .text("Remaining Lease Term")
+      .text("Remaining Lease Term (Yrs)")
 
     yax.append("text")
       .attr("class", "axis-text")
@@ -512,7 +512,7 @@ $ ->
 
     currentOverlay = overlays[selected_tab]
     if !currentOverlay
-      console.log("warning: #{selected_tab} overlay not found")
+      # console.log("warning: #{selected_tab} overlay not found")
       currentOverlay = overlays["all"]
     currentOverlayDiv = $(currentOverlay.name)
     currentOverlayDiv.delay(300).fadeIn(500)
