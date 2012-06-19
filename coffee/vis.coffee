@@ -244,7 +244,7 @@ class BubbleChart
       .attr("r", 0)
       .attr("fill", (d) => @fill_color(d.category))
       .attr("stroke-width", 0.7)
-      .attr("stroke", (d) => d3.rgb(@fill_color(d.category)).darker())
+      .attr("stroke", (d) => d3.rgb(@fill_color(d.category)).darker().toString())
       .attr("id", (d) -> "bubble_#{d.id}")
       .attr("class", "chart-bubble")
       .on("mouseover", (d,i) -> that.show_details(d,i,this))
@@ -463,7 +463,7 @@ class BubbleChart
     @tooltip.showTooltip(content,d3.event)
 
   hide_details: (data, i, element) =>
-    d3.select(element).attr("stroke", (d) => d3.rgb(@fill_color(d.category)).darker())
+    d3.select(element).attr("stroke", (d) => d3.rgb(@fill_color(d.category)).darker().toString())
     @tooltip.hideTooltip()
 
 
